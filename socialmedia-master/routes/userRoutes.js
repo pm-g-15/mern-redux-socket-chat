@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const nodemailer = require("nodemailer")
+
 const mongoose = require('mongoose');
 const User = require('../models/user');
 const FriendRequest = require('../models/friendRequest');
@@ -27,7 +27,7 @@ const Grid = require('gridfs-stream');
 ///////////// IMAGE STUFF
 router.use(methodOverride('_method'));
 
-const conn = mongoose.createConnection("mongodb+srv://pooja1012:zZp5MO7JTvgz57Yq@cluster0.ppwwi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority");
+const conn = mongoose.createConnection(process.env.MONGO_URI);
 // Init gfs
 let gfs;
 conn.once('open', () => {
@@ -36,7 +36,7 @@ conn.once('open', () => {
 });
 // create storage engine
 const storage = new GridFsStorage({
-  url: "mongodb+srv://pooja1012:zZp5MO7JTvgz57Yq@cluster0.ppwwi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
+  url: process.env.MONGO_URI,
   file: (req, file) => {
     return new Promise((resolve, reject) => {
       crypto.randomBytes(16, (err, buf) => {
@@ -118,47 +118,13 @@ router.post('/register', async (req, res) => {
     profilePicId: req.body.profilePicId,
   });
 
-
   // save new user to mongo
-
-  // let mailTransporter = nodemailer.createTransport({
-  //   pool: true,
-  //   host: 'smtp.gmail.com',
-  //   port: 587,
-  //   secure: false,
-  //   auth: {
-  //     user: 'pm.globaliasoft@gmail.com',
-  //     pass: "globaliapooja"
-  //   },
-  //   tls: {
-  //     rejectUnauthorized: false
-  //   }
-  // })
 
   newUser
     .save()
     .then((result) => {
-      
-    //   const token = jwt.sign({
-    //     id: result._id, name: req.body.name, email: req.body.email,
-    //     city: req.body.city, age: req.body.age, password: hashedPw
-    //   }, 'local development secret')
-    //   let mailOption = {
-    //     from: 'poojam9904@gmail.com',
-    //     to: 'pm.globaliasoft@gmail.com',
-    //     html: `<h2><a href="http://localhost:3001/login/${token}">veryfy</a></h2>`
-    //   };
-    //   mailTransporter.sendMail(mailOption, function (err, info) {
-    //     if (err) {
-    //       console.log(err)
-    //     } else {
-    //       res.status(201).send(result);
-    //       console.log("email sent")
-    //     }
-    //   });
-  res.json(result)  
-  })
-
+      res.status(201).send(result);
+    })
     .catch((err) => {
       res.status(400).send(err);
     });
@@ -192,7 +158,7 @@ router.post('/login', async (req, res) => {
               email: user.email,
             },
           },
-          'local development secret',
+          process.env.SECRET,
           { expiresIn: '3hr' }
         );
 

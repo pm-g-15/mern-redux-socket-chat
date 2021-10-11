@@ -63,16 +63,11 @@ if (process.env.NODE_ENV === "production") {
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname + "/client/public/index.html"));
 });
-
 mongoose
-  .connect(
-    "mongodb+srv://pooja1012:zZp5MO7JTvgz57Yq@cluster0.ppwwi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
-    { useNewUrlParser: true }
-  )
-
+  .connect(process.env.MONGO_URI, { useNewUrlParser: true })
   .then((res) => {
     const expressServer = app.listen(process.env.PORT || 8000);
-    // console.log('listening on port 8000');
+    console.log("listening on port 8000 && connected to database");
 
     // BEGIN SOCKET IO:
     const io = socketio(expressServer);
@@ -85,7 +80,7 @@ mongoose
           // console.log('no token auth denied');
         } else {
           try {
-            const decoded = jwt.verify(token, "local development secret");
+            const decoded = jwt.verify(token, process.env.SECRET);
             // console.log('DECODED: ', decoded);
             let current_time = Date.now() / 1000;
             if (decoded.exp < current_time) {
@@ -200,7 +195,7 @@ mongoose
       socket.on("disconnect", async (socketId) => {
         try {
           const token = socket.handshake.query.token;
-          const decoded = jwt.verify(token, "local development secret");
+          const decoded = jwt.verify(token, process.env.SECRET);
           const userId = decoded.tokenUser.userId;
           delete onlineUsers[userId];
         } catch (err) {

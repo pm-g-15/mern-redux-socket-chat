@@ -6,7 +6,7 @@ module.exports = function(req, res, next) {
     return res.status(401).json({ msg: 'Authorization denied' });
   }
   try {
-    const decoded = jwt.verify(token, 'local development secret');
+    const decoded = jwt.verify(token, process.env.SECRET);
     req.tokenUser = decoded.tokenUser;
     next();
   } catch (err) {

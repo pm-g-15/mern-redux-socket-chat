@@ -26,9 +26,9 @@ const Grid = require('gridfs-stream');
 // images
 router.use(methodOverride('_method'));
 
-const mongoURI ="mongodb+srv://pooja1012:zZp5MO7JTvgz57Yq@cluster0.ppwwi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+const mongoURI = process.env.MONGO_URI;
 
-const conn = mongoose.createConnection("mongodb+srv://pooja1012:zZp5MO7JTvgz57Yq@cluster0.ppwwi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority");
+const conn = mongoose.createConnection(mongoURI);
 let gfs;
 conn.once('open', () => {
   gfs = Grid(conn.db, mongoose.mongo);
